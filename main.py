@@ -51,6 +51,7 @@ def main():
             self.load_table()
             self.coffee_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
             self.add_button.clicked.connect(self.add_coffee)
+            self.delete_button.clicked.connect(self.delete_coffee)
 
         def load_table(self):
             self.coffee_table.setRowCount(0)
@@ -73,6 +74,16 @@ def main():
             dialog = AddCoffee()
             dialog.show()
             if dialog.exec():
+                self.load_table()
+                print('Данные изменены')
+
+        def delete_coffee(self):
+            if self.coffee_table.selectedItems():
+                id_coffee = self.coffee_table.item(self.coffee_table.currentRow(), 0).text()
+                with sqlite3.connect('coffee.sqlite3') as file:
+                    file.cursor().execute('delete from coffees where id = ?;', (id_coffee,))
+                    file.commit()
+                self.coffee_table.clearSelection()
                 self.load_table()
                 print('Данные изменены')
 
