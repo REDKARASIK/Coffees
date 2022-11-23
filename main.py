@@ -1,27 +1,28 @@
 import sys
 import sqlite3
-from PyQt5.QtWidgets import QMainWindow, QApplication, QTableWidgetItem
-from PyQt5 import uic
+from PyQt5.QtWidgets import QMainWindow, QApplication, QTableWidgetItem, QAbstractItemView
+from mainUI import Ui_MainWindow
 
 
 def main():
-    class CoffeeShow(QMainWindow):
+    class CoffeeShow(QMainWindow, Ui_MainWindow):
         def __init__(self):
             super().__init__()
-            uic.loadUi('mainUI.ui', self)
+            self.setupUi(self)
             self.load_table()
+            self.coffee_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         def load_table(self):
             self.coffee_table.setRowCount(0)
 
             with sqlite3.connect('coffee.sqlite3') as file:
                 result = file.cursor().execute(
-                    'select sorts.name, degree.name, coffees."ground/in grains", coffees.taste, '
+                    'select coffees.id, sorts.name, degree.name, coffees."ground/in grains", coffees.taste, '
                     'coffees.price, coffees.amount from coffees left join sorts on sorts.id = coffees.sort '
                     'left join degree on degree.id = coffees."degree of roasting"').fetchall()
                 self.coffee_table.setColumnCount(len(result[0]))
                 self.coffee_table.setHorizontalHeaderLabels(
-                    ['Название сорта', 'Степень обжарки', 'Молотый/в зёрнах', 'Описание вкуса', 'Цена',
+                    ['ИД', 'Название сорта', 'Степень обжарки', 'Молотый/в зёрнах', 'Описание вкуса', 'Цена',
                      'Объём упаковки'])
                 for i, row in enumerate(result):
                     self.coffee_table.setRowCount(self.coffee_table.rowCount() + 1)
