@@ -11,6 +11,7 @@ def main():
             super().__init__()
             self.setupUi(self)
             self.make_comboboxes()
+            self.save_button.clicked.connect(self.add_coffee)
 
         def make_comboboxes(self):
             with sqlite3.connect('coffee.sqlite3') as file:
@@ -25,6 +26,23 @@ def main():
                 # Grounded_box
                 self.ground_box.addItem('0')
                 self.ground_box.addItem('1')
+
+        def add_coffee(self):
+            self.error_label.setText('')
+            price = self.price_spin.text().replace(',', '.')
+            amount = self.amount_spin.text().replace(',', '.')
+            if self.taste_edit.toPlainText() and float(price) > 0 and float(amount) > 0:
+                text = self.taste_edit.toPlainText().replace('\n', '; ')
+                with sqlite3.connect('coffee.sqlite3') as file:
+                    file.cursor().execute('insert into coffees(sort, "degree of roasting", "ground/in grains", taste,'
+                                          ' price, amount) values ((select id from sorts where sorts.name = ?),'
+                                          ' (select id from degree where degree.name = ?), ?, ?, ?, ?)',
+                                          (self.sort_box.currentText(), self.degree_box.currentText(),
+                                           self.ground_box.currentText(), text, price, amount))
+                    file.commit()
+                self.done(1)
+            else:
+                self.error_label.setText('Неверно заполнена форма')
 
     class CoffeeShow(QMainWindow, Ui_MainWindow):
         def __init__(self):
@@ -55,6 +73,7 @@ def main():
             dialog = AddCoffee()
             dialog.show()
             if dialog.exec():
+                self.load_table()
                 print('Данные изменены')
 
     app = QApplication(sys.argv)
