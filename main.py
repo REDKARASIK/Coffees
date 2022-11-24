@@ -22,7 +22,7 @@ def main():
             self.save_button.clicked.connect(self.change_coffees)
 
         def make_comboboxes(self):
-            with sqlite3.connect('coffee.sqlite3') as file:
+            with sqlite3.connect('data/coffee.sqlite3') as file:
                 # Combobox_sort
                 result = file.cursor().execute('select sorts.name from sorts').fetchall()
                 for i in result:
@@ -49,7 +49,7 @@ def main():
             amount = float(self.amount_spin.text().replace(',', '.'))
             if self.taste_edit.toPlainText() and price > 0 and amount > 0:
                 text = self.taste_edit.toPlainText().replace('\n', '; ')
-                with sqlite3.connect('coffee.sqlite3') as file:
+                with sqlite3.connect('data/coffee.sqlite3') as file:
                     file.cursor().execute('update coffees set sort = (select id from sorts where name = ?), '
                                           '"degree of roasting" = (select id from degree where name = ?),'
                                           ' "ground/in grains" = ?, taste = ?, price = ?, amount = ? where id = ?',
@@ -69,7 +69,7 @@ def main():
             self.save_button.clicked.connect(self.add_coffee)
 
         def make_comboboxes(self):
-            with sqlite3.connect('coffee.sqlite3') as file:
+            with sqlite3.connect('data/coffee.sqlite3') as file:
                 # Combobox_sort
                 result = file.cursor().execute('select sorts.name from sorts').fetchall()
                 for i in result:
@@ -88,7 +88,7 @@ def main():
             amount = float(self.amount_spin.text().replace(',', '.'))
             if self.taste_edit.toPlainText() and price > 0 and amount > 0:
                 text = self.taste_edit.toPlainText().replace('\n', '; ')
-                with sqlite3.connect('coffee.sqlite3') as file:
+                with sqlite3.connect('data/coffee.sqlite3') as file:
                     file.cursor().execute('insert into coffees(sort, "degree of roasting", "ground/in grains", taste,'
                                           ' price, amount) values ((select id from sorts where sorts.name = ?),'
                                           ' (select id from degree where degree.name = ?), ?, ?, ?, ?)',
@@ -112,7 +112,7 @@ def main():
         def load_table(self):
             self.coffee_table.setRowCount(0)
 
-            with sqlite3.connect('coffee.sqlite3') as file:
+            with sqlite3.connect('data/coffee.sqlite3') as file:
                 result = file.cursor().execute(
                     'select coffees.id, sorts.name, degree.name, coffees."ground/in grains", coffees.taste, '
                     'coffees.price, coffees.amount from coffees left join sorts on sorts.id = coffees.sort '
@@ -136,7 +136,7 @@ def main():
         def delete_coffee(self):
             if self.coffee_table.selectedItems():
                 id_coffee = self.coffee_table.item(self.coffee_table.currentRow(), 0).text()
-                with sqlite3.connect('coffee.sqlite3') as file:
+                with sqlite3.connect('data/coffee.sqlite3') as file:
                     file.cursor().execute('delete from coffees where id = ?;', (id_coffee,))
                     file.commit()
                 self.coffee_table.clearSelection()
